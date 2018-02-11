@@ -1,0 +1,50 @@
+# ansible-playbook -v -i ~/ansible/hosts /playbooks/setup-s2558.yml
+---
+- hosts: s2558
+  gather_facts: yes
+
+  tasks:
+
+    # Run apt-get update and apt-get upgrade 
+    - include: ../tasks/update.yml
+      tags: update
+
+    - name: Install dependancies from apt
+      become: yes
+      apt: name={{item}} state=installed
+      with_items:
+        - git
+        - hfsprogs
+        - hfsplus 
+        - python
+        - python-pip
+
+    - name: Install docker
+      include: ../tasks/install-docker.yml
+      tags: docker
+
+    - name: Install docker-compose
+      become: yes
+      pip:
+        name: docker-compose
+
+    - name: Mount time machine drive
+      become: yes
+      mount:
+        path: /media/timemachine
+        src: LABEL=STORAGE
+        fstype: hfsplus
+        opts: force,rw,user,auto,nofail,nobootwait
+        state: present
+
+    - name: Clone compose repo
+      become: no
+      git:
+        repo: 'https://github.com/nsaje/piserver.git'
+        dest: /home/pi/piserver
+
+    - name: Ensure piserver compose running
+      become: no
+      command: docker-compose up -d
+      args:
+        chdir: /home/pi/piserver

@@ -1,0 +1,20 @@
+- name: Checking if docker installed
+  stat:
+    path: /home/pi/.docker-installed
+  register: docker_installed
+
+- name: Install docker
+  include_role:
+    name: Benaud12.docker-pi
+  when: not docker_installed.stat.exists
+
+- name: Add pi user to docker group
+  become: yes
+  user:
+    name: pi
+    groups: docker
+
+- name: Marking docker as installed
+  command: touch /home/pi/.docker-installed
+  args:
+    creates: /home/pi/.docker-installed

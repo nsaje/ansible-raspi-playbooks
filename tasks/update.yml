@@ -7,6 +7,7 @@
   become: yes
   apt: 
     update_cache=yes
+    cache_valid_time=3600
 
 # Upgrade apt packages
 - name: Upgrade apt packages

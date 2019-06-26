@@ -18,6 +18,7 @@
         - hfsplus 
         - python
         - python-pip
+        - ntfs-3g
 
     - name: Install docker
       include: ../tasks/install-docker.yml
@@ -33,8 +34,26 @@
       mount:
         path: /media/timemachine
         src: LABEL=STORAGE
-        fstype: hfsplus
-        opts: force,rw,user,auto,nofail,nobootwait
+        fstype: ext4
+        opts: defaults,nofail
+        state: present
+
+    - name: Mount 250gb disk
+      become: yes
+      mount:
+        path: /media/disk250
+        src: LABEL=DISK250
+        fstype: ext4
+        opts: defaults,nofail
+        state: present
+
+    - name: Mount 750gb disk
+      become: yes
+      mount:
+        path: /media/disk750
+        src: LABEL=DISK750
+        fstype: ext4
+        opts: defaults,nofail
         state: present
 
     - name: Clone compose repo
